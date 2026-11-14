@@ -99,6 +99,11 @@ def _bound(value, low, high):
 
 
 def _to_logit(price):
+    # A non-finite price (NaN/inf from a malformed case) is treated as
+    # the neutral 0.5 instead of poisoning every downstream value:
+    # _bound passes NaN through unchanged, and log(NaN) is NaN.
+    if not math.isfinite(price):
+        price = 0.5
     price = _bound(price, LOGIT_LO, LOGIT_HI)
     return math.log(price / (1.0 - price))
 
